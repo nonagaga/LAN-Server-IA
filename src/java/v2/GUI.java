@@ -2,11 +2,10 @@ package v2;
 
 import javax.swing.*;
 import java.awt.event.*;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.lang.reflect.Executable;
 import java.text.SimpleDateFormat;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class GUI {
@@ -16,9 +15,11 @@ public class GUI {
     public JTextArea Chat;
     public JButton ConnectButton;
     public JTextField URI_Input;
-    private JLabel yourIPIsLabel;
-    private JScrollPane ChatScroll;
+    public JScrollPane ChatScroll;
+    public JTextArea username;
     public static PeerConnectionHandler handler;
+
+    public static Thread speakThread;
 
     public GUI() {
 
@@ -26,11 +27,25 @@ public class GUI {
 
         Chat.setLineWrap(true);
 
-        try {
-            yourIPIsLabel.setText("Your IP is " + NetworkTools.getPrivateIP().toString());
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
+        Input.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getExtendedKeyCode() == 10){
+                    handler.handleSend(Input.getText());
+                    Input.setText("");
+                }
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+
+            }
+        });
 
         sendButton.addActionListener(new ActionListener() {
             /**
@@ -40,6 +55,7 @@ public class GUI {
              */
             public void actionPerformed(ActionEvent e) {
                 handler.handleSend(Input.getText());
+                Input.setText("");
             }
         });
         ConnectButton.addActionListener(new ActionListener() {
@@ -58,6 +74,8 @@ public class GUI {
         Date today = new Date();
         SimpleDateFormat format = new SimpleDateFormat("h:mm a");
         String message = format.format(today) + " - " + data;
+        speakThread = new Thread (new FreeTTS(data), "Speak Thread");
+        speakThread.start();
         Chat.append("\n" + message);
         Chat.setCaretPosition(Chat.getDocument().getLength());
     }
@@ -67,7 +85,9 @@ public class GUI {
 
         frame.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
+                speakThread.interrupt();
                 handler.handleShutdown();
+                FreeTTS.handleShutdown();
             }
         });
 

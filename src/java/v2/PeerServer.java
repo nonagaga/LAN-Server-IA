@@ -5,6 +5,8 @@ import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
 import java.net.*;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 public class PeerServer extends WebSocketServer {
     PeerConnectionHandler handler;
@@ -50,6 +52,12 @@ public class PeerServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket conn, String message) {
         handler.handleReceive(conn, message);
+    }
+
+
+    @Override
+    public void onMessage(WebSocket conn, ByteBuffer message){
+        handler.handleAddUsername(conn, StandardCharsets.UTF_8.decode(message).toString());
     }
 
     /**

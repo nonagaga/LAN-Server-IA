@@ -4,9 +4,7 @@ import org.java_websocket.WebSocket;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 
 public class PeerConnectionHandler {
     private static GUI gui;
@@ -30,12 +28,8 @@ public class PeerConnectionHandler {
 
         try {
             System.out.println("Automatically self-connecting to: " + "ws://" + NetworkTools.getPrivateIP().getHostAddress() + ":8887");
-            PeerConnection selfConnection = new PeerConnection(new PeerClient(new URI("ws://" + NetworkTools.getPrivateIP().getHostAddress() + ":8887")));
-            selfConnection.getClient().connect();
-            PeerConnectionList.add(selfConnection);
+            handleAddConnection(NetworkTools.getPrivateIP().getHostAddress());
         } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
             e.printStackTrace();
         }
     }
@@ -57,6 +51,11 @@ public class PeerConnectionHandler {
             System.out.println("client is trying to connect to: " + client.getURI());
             client.connect();
             PeerConnectionList.add(new PeerConnection(client));
+            String username = PeerConnectionList.getPeerConnectionFromPeerClient(client).getPeerInfo().getUsername();
+            gui.write(username + " has connected!");
+            if (PeerConnectionList.getConnections().size() == 1) {
+                gui.username.setText("Your Username is: \n" + username);
+            }
         } catch (UnknownHostException e) {
             System.out.println("Connection couldn't be added!");
             e.printStackTrace();
@@ -74,7 +73,7 @@ public class PeerConnectionHandler {
             PeerConnectionList.add(new PeerConnection(conn));
         }
         PeerInfo info = PeerConnectionList.getPeerConnectionFromWebSocket(conn).getPeerInfo();
-        gui.write(info.getUsername() + " said: " + data);
+        gui.write(info.getUsername() + ": " + data);
     }
 
     public void handleShutdown(){
@@ -90,5 +89,9 @@ public class PeerConnectionHandler {
              ) {
             connection.getClient().close();
         }
+    }
+
+    public void handleAddUsername(WebSocket conn, String s){
+        PeerConnectionList.getPeerConnectionFromWebSocket(conn).getPeerInfo().setUsername(s);
     }
 }

@@ -19,13 +19,13 @@ public class PeerInfo {
         this.port = port;
         this.hostAddress = hostAddress;
         UsernameGenerator generator = new UsernameGenerator();
-        username = generator.generateUsername();
+        username = generator.generateUsernameFromIP(hostAddress.toString());
     }
 
     public PeerInfo(WebSocket conn){
         hostAddress = conn.getRemoteSocketAddress().getAddress();
         UsernameGenerator generator = new UsernameGenerator();
-        username = generator.generateUsername();
+        username = generator.generateUsernameFromIP(conn.getLocalSocketAddress().getAddress().toString());
     }
 
     public int getPort() {

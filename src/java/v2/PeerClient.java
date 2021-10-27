@@ -26,6 +26,12 @@ public class PeerClient extends WebSocketClient {
     @Override
     public void onOpen(ServerHandshake handshakedata) {
         System.out.println("Client successfully connected to: " + this.getRemoteSocketAddress().getAddress());
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        send(PeerConnectionList.getConnections().get(0).getPeerInfo().getUsername().getBytes());
     }
 
     /**
@@ -60,5 +66,6 @@ public class PeerClient extends WebSocketClient {
     @Override
     public void onError(Exception ex) {
         System.err.println("error in client: " + ex);
+        ex.printStackTrace();
     }
 }

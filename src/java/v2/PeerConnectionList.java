@@ -39,6 +39,16 @@ public class PeerConnectionList {
         return null;
     }
 
+    public static PeerConnection getPeerConnectionFromPeerClient(PeerClient client){
+        for (PeerConnection connection: connections
+             ) {
+            if (connection.getClient().equals(client)){
+                return connection;
+            }
+        }
+        return null;
+    }
+
     public static ArrayList<PeerConnection> getConnections() {
         return connections;
     }
